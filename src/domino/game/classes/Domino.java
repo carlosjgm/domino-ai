@@ -39,4 +39,9 @@ public class Domino {
 	public int getScore() {
 		return this.score;
 	}
+	
+	public boolean isDouble() {
+		return this.leftRank==this.rightRank;
+	}
+	
 }

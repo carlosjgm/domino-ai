@@ -9,32 +9,55 @@ public class RandomPlayer implements Player {
 	private int score;
 	private int handScore;
 	private Random rand;
+	private boolean silent;
 
-	public RandomPlayer(){
+	public RandomPlayer(boolean silent){
 		this.score = 0;
 		this.rand = new Random();
+		this.silent = silent;
 	}
 
 	@Override
 	public boolean play(Table table) {
-		System.out.println("Dominoes in hand = " + this.hand.size());
-		ArrayList<Domino> valid = this.validDominoes(table);
-		if(valid.size()==0) {
-			System.out.println("No valid domino can be played. Skipping turn.\n");
-			return false;
+
+		if(!silent) {
+			System.out.println("Dominoes in hand = " + this.hand.size());
+			ArrayList<Domino> valid = this.validDominoes(table);
+			if(valid.size()==0) {
+				System.out.println("No valid domino can be played. Skipping turn.\n");
+				return false;
+			}
+			else {
+				Domino playedDomino = valid.get(this.rand.nextInt(valid.size()));
+				table.play(playedDomino);
+				for(Domino handDomino: this.hand)
+					if(handDomino.equals(playedDomino)) {
+						this.hand.remove(handDomino);
+						break;
+					}
+				System.out.println("Played " + playedDomino.toString() + ".\n");
+				this.updateHandScore();
+				return true;
+			}		
 		}
+		
 		else {
-			Domino playedDomino = valid.get(this.rand.nextInt(valid.size()));
-			table.play(playedDomino);
-			for(Domino handDomino: this.hand)
-				if(handDomino.equals(playedDomino)) {
-					this.hand.remove(handDomino);
-					break;
-				}
-			System.out.println("Played " + playedDomino.toString() + ".\n");
-			this.updateHandScore();
-			return true;
-		}			
+			ArrayList<Domino> valid = this.validDominoes(table);
+			if(valid.size()==0) {
+				return false;
+			}
+			else {
+				Domino playedDomino = valid.get(this.rand.nextInt(valid.size()));
+				table.play(playedDomino);
+				for(Domino handDomino: this.hand)
+					if(handDomino.equals(playedDomino)) {
+						this.hand.remove(handDomino);
+						break;
+					}
+				this.updateHandScore();
+				return true;
+			}		
+		}
 	}
 
 	@Override
@@ -148,7 +171,8 @@ public class RandomPlayer implements Player {
 			for(Domino domino : this.hand) 
 				if(domino.getLeftRank()==6 && domino.getRightRank()==6) {
 					table.play(domino);
-					System.out.println("Played " + domino.toString() + ".\n");
+					if(!silent)
+						System.out.println("Played " + domino.toString() + ".\n");
 					this.hand.remove(domino);
 					this.updateHandScore();
 					break;
